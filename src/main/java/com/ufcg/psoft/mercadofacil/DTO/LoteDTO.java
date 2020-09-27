@@ -5,8 +5,7 @@ public class LoteDTO {
     private int numeroDeItens;
     private String dataDeValidade;
 
-    public LoteDTO() {
-    }
+    public LoteDTO() {}
 
     public LoteDTO(int numeroDeItens, String dataDeValidade) {
         super();

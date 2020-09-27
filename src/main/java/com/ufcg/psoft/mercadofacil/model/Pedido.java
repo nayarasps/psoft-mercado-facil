@@ -1,19 +1,22 @@
 package com.ufcg.psoft.mercadofacil.model;
 
-import org.hibernate.annotations.ManyToAny;
+
+import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 public class Pedido {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @OneToOne
     private Produto produto;
     private int quantidade;
+
+    @ManyToOne
+    private Carrinho carrinho;
 
     public Pedido() {
         super();
@@ -44,6 +47,10 @@ public class Pedido {
 
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public void setCarrinho(Carrinho carrinho) {
+        this.carrinho = carrinho;
     }
 
     @Override

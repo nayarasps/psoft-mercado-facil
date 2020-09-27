@@ -153,7 +153,7 @@ public class Produto {
 	
 	
 	public String toString() {
-		return this.id + " " + this.nome;
+		return this.id + "-" + this.nome;
 	}
 	
 }

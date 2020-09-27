@@ -46,4 +46,20 @@ public class Usuario {
     public void setCompras(List<Compra> compras) {
         this.compras = compras;
     }
+
+    public List<String> compraSimples(List<Compra> compra) {
+        List<String> simples = new ArrayList<>();
+        for (Compra c : compra) {
+            simples.add(c.getId() + " - " + c.getData() + " - " + c.getProdutos().toString() + " - " + c.getValor());
+        }
+        return simples;
+    }
+
+    public List<String> compraDetalhada(Compra compra) {
+        List<String> detalhada = new ArrayList<>();
+        detalhada.add(compra.getId() + " - " + compra.getData() + " - " + compra.getProdutos()+ " - " +
+                compra.getValor() + " - " + compra.stringPagamento(compra.getPagamento()));
+
+        return detalhada;
+    }
 }

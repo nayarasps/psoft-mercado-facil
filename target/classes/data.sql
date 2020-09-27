@@ -30,13 +30,13 @@ insert into carrinho
 values(200);
 
 insert into pedido
-values(1,3,10004);
+values(1,3,100,10004);
 insert into pedido
-values(2,7,10005);
+values(2,7,200,10005);
 insert into carrinho_pedidos
-values(200,1);
+values(100,1);
 insert into carrinho_pedidos
-values(100,2);
+values(200,2);
 
 
 

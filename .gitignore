@@ -1,0 +1,6 @@
+/target/
+/database/
+.settings/
+.project
+.classpath
+.idea/
