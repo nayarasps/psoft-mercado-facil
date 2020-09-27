@@ -1,25 +1,24 @@
 package com.ufcg.psoft.mercadofacil.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import exceptions.PagamentoInvalidoException;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Entity
 public class Compra {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
     private String data;
 
-    @OneToMany
-    private List<Pedido> pedidos;
+    @ManyToMany
+    private Set<Produto> produtos = new HashSet<Produto>();
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Usuario usuario;
 
     public int pagamento; // usa variaveis estaticas abaixo
     /* formas de pagamento */
@@ -27,16 +26,16 @@ public class Compra {
     public static final int PAYPAL = 2;
     public static final int CARTAO = 3;
 
-    public BigDecimal valor;
+    public double valor;
 
     public Compra() {super();}
 
-    public Compra(long id, String data, int pagamento, List<Pedido> pedidos, BigDecimal valor) {
+    public Compra(long id, String data, int pagamento, Set<Produto> produtos, double valor) {
         super();
         this.id = id;
         this.data = data;
         this.pagamento = pagamento;
-        this.pedidos = pedidos;
+        this.produtos = produtos;
         this.valor = valor;
     }
 
@@ -59,31 +58,63 @@ public class Compra {
         return this.pagamento;
     }
 
-    public void setPedidos(List<Pedido> pedidos) {
-        this.pedidos = pedidos;
+    public void setProdutos(Set<Produto> produtos) {
+        this.produtos = produtos;
     }
 
-    public void setValor(BigDecimal valor) {
+    public Set<Produto> getProdutos() {
+        return this.produtos;
+    }
+
+    public void setValor(double valor) {
         this.valor = valor;
-    }
-
-    public Set<String> getPedidos() {
-        Set<String> compras = new HashSet<String>();
-        for (Pedido p: pedidos) {
-            compras.add(p.getProduto().getNome() + " - " + p.getProduto().getFabricante());
-        }
-        return compras;
     }
 
     public long getId() {
         return this.id;
     }
 
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public String gerarData() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        Date data = new Date();
+        return formatter.format(data);
+    }
+
+    public Set<Produto> adicionaProduto(Produto produto) {
+        this.produtos.add(produto);
+        return this.produtos;
+    }
+
     public String getData() {
         return this.data;
     }
 
+    public double getValor() {
+        return this.valor;
+    }
 
-
-
+    public String stringPagamento(int pagamento) {
+        if (pagamento == 1) {
+            return "BOLETO";
+        }
+        if (pagamento == 2) {
+            return "PAYPAL";
+        }
+        if (pagamento == 3) {
+            return "CARTAO";
+        }
+        return "invalido";
+    }
 }
