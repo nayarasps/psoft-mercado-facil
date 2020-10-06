@@ -21,9 +21,9 @@ insert into lote
 values(5, '02/05/2022', 21, 10005);
 
 insert into usuario
-values(100);
+values('Normal',100);
 insert into usuario
-values(200);
+values('Normal',200);
 insert into carrinho
 values(100);
 insert into carrinho

@@ -2,20 +2,26 @@ package com.ufcg.psoft.mercadofacil.DTO;
 
 public class CompraDTO {
 
-    private int pagamento;
+    /*
+    Pagamentos em:
+    - Boleto
+    - CartaoCredito
+    - PayPal
+     */
+    private String pagamento;
 
     public CompraDTO() {}
 
-    public CompraDTO(int pagamento){
+    public CompraDTO(String pagamento){
         super();
         this.pagamento = pagamento;
     }
 
-    public int getPagamento() {
+    public String getPagamento() {
         return pagamento;
     }
 
-    public void setPagamento(int pagamento) {
+    public void setPagamento(String pagamento) {
         this.pagamento = pagamento;
     }
 }
