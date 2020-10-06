@@ -1,8 +1,6 @@
 package com.ufcg.psoft.mercadofacil.model;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import com.ufcg.psoft.mercadofacil.model.Usuario.Usuario;
 
 import javax.persistence.*;
 import java.util.ArrayList;

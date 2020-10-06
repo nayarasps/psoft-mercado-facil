@@ -1,9 +1,11 @@
 package com.ufcg.psoft.mercadofacil.controller;
 
+import com.ufcg.psoft.mercadofacil.DTO.UsuarioDTO;
 import com.ufcg.psoft.mercadofacil.model.Carrinho;
 import com.ufcg.psoft.mercadofacil.model.Compra;
-import com.ufcg.psoft.mercadofacil.model.Produto;
-import com.ufcg.psoft.mercadofacil.model.Usuario;
+import com.ufcg.psoft.mercadofacil.model.Usuario.Usuario;
+import com.ufcg.psoft.mercadofacil.model.Usuario.UsuarioEspecial;
+import com.ufcg.psoft.mercadofacil.model.Usuario.UsuarioNormal;
 import com.ufcg.psoft.mercadofacil.repositories.*;
 import com.ufcg.psoft.mercadofacil.util.CustomErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.yaml.snakeyaml.emitter.ScalarAnalysis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +35,15 @@ public class UsuarioController {
     CompraRepository compraRepository;
 
     @RequestMapping(value = "/usuario/", method = RequestMethod.POST)
-    public ResponseEntity<?> criarUsuario(@RequestBody Usuario usuario, UriComponentsBuilder ucBuilder) {
-        Optional<Usuario> optionalUsuario = usuarioRepository.findById(usuario.getId());
+    public ResponseEntity<?> criarUsuario(@RequestBody UsuarioDTO usuarioDTO, UriComponentsBuilder ucBuilder) {
+        Optional<Usuario> optionalUsuario = usuarioRepository.findById(usuarioDTO.getId());
 
         if (optionalUsuario.isPresent()) {
-            return new ResponseEntity<CustomErrorType>(new CustomErrorType("O usuario " + usuario.getId()
+            return new ResponseEntity<CustomErrorType>(new CustomErrorType("O usuario " + usuarioDTO.getId()
                     + " ja esta cadastrado!"), HttpStatus.CONFLICT);
         }
 
+        Usuario usuario = new UsuarioNormal(usuarioDTO.getId());
         Carrinho carrinho = new Carrinho();
         carrinho.setUsuario(usuario);
         carrinhoRepository.save(carrinho);
@@ -100,5 +102,6 @@ public class UsuarioController {
 
         return new ResponseEntity<List<String>>(detalhada, HttpStatus.OK);
     }
+
 
 }

@@ -4,6 +4,9 @@ import com.ufcg.psoft.mercadofacil.DTO.CompraDTO;
 import com.ufcg.psoft.mercadofacil.DTO.PedidoDTO;
 import com.ufcg.psoft.mercadofacil.model.*;
 
+import com.ufcg.psoft.mercadofacil.model.Pagamento.Boleto;
+import com.ufcg.psoft.mercadofacil.model.Pagamento.Pagamento;
+import com.ufcg.psoft.mercadofacil.model.Usuario.Usuario;
 import com.ufcg.psoft.mercadofacil.repositories.*;
 import com.ufcg.psoft.mercadofacil.util.CustomErrorType;
 import exceptions.PagamentoInvalidoException;
@@ -12,6 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @RestController
@@ -32,6 +39,7 @@ public class CarrinhoController {
     LoteRepository loteRepository;
     @Autowired
     CompraRepository compraRepository;
+
 
     // id produto gerado aleatoriamente(opcional)
     @RequestMapping(value = "/usuario/{id}/pedido", method = RequestMethod.POST)
@@ -100,7 +108,7 @@ public class CarrinhoController {
     }
 
     // Desfaz(Reinicia) o carrinho sem salvar a compra
-    @RequestMapping(value = "/usuario/{id}/desfaz", method = RequestMethod.PUT)
+    @RequestMapping(value = "/usuario/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> desfazCarrinho(@PathVariable("id") long id) {
         Optional<Carrinho> optionalCarrinho = carrinhoRepository.findById(id);
 
@@ -117,7 +125,7 @@ public class CarrinhoController {
     }
 
     @RequestMapping(value = "/usuario/{id}/compra", method = RequestMethod.POST)
-    public ResponseEntity<?> compraCarrinho(@PathVariable("id") long id, @RequestBody CompraDTO compraDTO) throws PagamentoInvalidoException {
+    public ResponseEntity<?> compraCarrinho(@PathVariable("id") long id, @RequestBody CompraDTO compraDTO) throws PagamentoInvalidoException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         Optional<Carrinho> optionalCarrinho = carrinhoRepository.findById(id);
 
@@ -138,12 +146,13 @@ public class CarrinhoController {
         Compra compra = new Compra();
         String data = compra.gerarData();
         compra.setData(data);
-        compra.setPagamento(compraDTO.getPagamento());
 
         List<Pedido> pedidos = carrinho.getPedidos();
-        compra.setValor(carrinho.calculaTotal());
+        double valor = carrinho.calculaTotal();
 
+        int numeroProdutos = 0;
         for (Pedido p : pedidos) {
+            numeroProdutos += p.getQuantidade();
             Lote lote = loteRepository.findLoteByProdutoId(p.getProduto().getId());
             int numeroItens = lote.getNumeroDeItens() - p.getQuantidade();
             lote.setNumeroDeItens(numeroItens);
@@ -156,6 +165,28 @@ public class CarrinhoController {
             }
             compra.setProdutos(new HashSet<>(compra.adicionaProduto(p.getProduto())));
         }
+
+        // Desconto dependendo da quantidade de produtos no carrinho
+        double valorPagamento = usuario.descontoCompras(valor, numeroProdutos);
+
+        Pagamento pagamento;
+        if (compraDTO.getPagamento() == null){
+            compra.setPagamento("Boleto");
+            pagamento = new Boleto();
+        }
+        else {
+            try{
+                compra.setPagamento(compraDTO.getPagamento());
+                Class cl = Class.forName("com.ufcg.psoft.mercadofacil.model.Pagamento." + compraDTO.getPagamento());
+                pagamento = (Pagamento)cl.getDeclaredConstructor().newInstance();
+            }
+            catch(ClassNotFoundException e){
+                throw new IllegalArgumentException("Pagamento Invalido");
+            }
+        }
+        BigDecimal b = new BigDecimal(pagamento.getValor(valorPagamento));
+        compra.setValor(b.setScale(2, RoundingMode.HALF_UP));
+
         compra.setUsuario(usuarioRepository.findUsuarioById(id));
         compraRepository.save(compra);
         usuario.setCompras(usuario.adicionaCompra(compra));
@@ -165,7 +196,7 @@ public class CarrinhoController {
         Carrinho car = new Carrinho(id);
         carrinhoRepository.save(car);
 
-        return new ResponseEntity<>(compra, HttpStatus.CREATED);
+        return new ResponseEntity<String>(compra.toString(), HttpStatus.CREATED);
     }
 
 

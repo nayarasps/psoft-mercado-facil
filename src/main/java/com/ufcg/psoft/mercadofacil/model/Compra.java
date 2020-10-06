@@ -1,8 +1,10 @@
 package com.ufcg.psoft.mercadofacil.model;
 
+import com.ufcg.psoft.mercadofacil.model.Usuario.Usuario;
 import exceptions.PagamentoInvalidoException;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -20,17 +22,13 @@ public class Compra {
     @ManyToOne(cascade = CascadeType.ALL)
     private Usuario usuario;
 
-    public int pagamento; // usa variaveis estaticas abaixo
-    /* formas de pagamento */
-    public static final int BOLETO = 1;
-    public static final int PAYPAL = 2;
-    public static final int CARTAO = 3;
+    private String pagamento;
 
-    public double valor;
+    public BigDecimal valor;
 
     public Compra() {super();}
 
-    public Compra(long id, String data, int pagamento, Set<Produto> produtos, double valor) {
+    public Compra(long id, String data, String pagamento, Set<Produto> produtos, BigDecimal valor) {
         super();
         this.id = id;
         this.data = data;
@@ -39,22 +37,11 @@ public class Compra {
         this.valor = valor;
     }
 
-    public void setPagamento(int pagamento) throws PagamentoInvalidoException {
-        switch (pagamento) {
-            case 1:
-                this.pagamento = Compra.BOLETO;
-                break;
-            case 2:
-                this.pagamento = Compra.PAYPAL;
-                break;
-            case 3:
-                this.pagamento = Compra.CARTAO;
-                break;
-            default:
-                throw new PagamentoInvalidoException("Forma de Pagamento Invalida");
+    public void setPagamento(String pagamento) throws PagamentoInvalidoException {
+        this.pagamento = pagamento;
     }
-}
-    public int getPagamento() {
+
+    public String getPagamento() {
         return this.pagamento;
     }
 
@@ -66,7 +53,7 @@ public class Compra {
         return this.produtos;
     }
 
-    public void setValor(double valor) {
+    public void setValor(BigDecimal valor) {
         this.valor = valor;
     }
 
@@ -101,20 +88,12 @@ public class Compra {
         return this.data;
     }
 
-    public double getValor() {
+    public BigDecimal getValor() {
         return this.valor;
     }
 
-    public String stringPagamento(int pagamento) {
-        if (pagamento == 1) {
-            return "BOLETO";
-        }
-        if (pagamento == 2) {
-            return "PAYPAL";
-        }
-        if (pagamento == 3) {
-            return "CARTAO";
-        }
-        return "invalido";
+    @Override
+    public String toString() {
+        return "Data: " + getData() + "\n" + "Valor: " + getValor().toString() + "\n" + "Produtos: " + getProdutos();
     }
 }
